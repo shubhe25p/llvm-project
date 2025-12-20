@@ -43,6 +43,19 @@ if(NOT TARGET ${target_error_mapper})
     set(target_error_mapper libc.src.stdio.printf_core.generic.error_mapper)
 endif()
 
+if(LIBC_CONF_PRINTF_DISABLE_WIDE)
+  set(wchar_deps "")
+  list(APPEND printf_config_copts "-DLIBC_COPT_PRINTF_DISABLE_WIDE")
+else()
+  set(wchar_deps
+    libc.hdr.types.wchar_t
+    libc.hdr.types.wint_t
+    libc.hdr.wchar_macros
+    libc.src.__support.wchar.wcrtomb
+    libc.src.__support.wchar.mbstate
+  )
+endif()
+
 add_header_library(
   printf_config
   HDRS
@@ -76,6 +89,7 @@ add_header_library(
     libc.src.__support.CPP.string_view
     libc.src.__support.CPP.type_traits
     libc.src.__support.common
+    ${wchar_deps}
 )
 
 add_header_library(
@@ -125,6 +139,7 @@ add_header_library(
     libc.src.__support.uint128
     libc.src.__support.StringUtil.error_to_string
     libc.src.string.memory_utils.inline_memcpy
+    ${wchar_deps}
 )
 
 add_header_library(
