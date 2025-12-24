@@ -3541,12 +3541,12 @@ TEST(LlvmLibcSprintfTest, WideCharConversion) {
   // WEOF test.
   written = LIBC_NAMESPACE::sprintf(buff, "%lc", static_cast<wchar_t>(WEOF));
   EXPECT_EQ(written, -1);
-  EXPECT_EQ(libc_errno, EILSEQ);
+  EXPECT_EQ(static_cast<int>(libc_errno), EILSEQ);
 
   // Invalid wide character test
   written =
       LIBC_NAMESPACE::sprintf(buff, "%lc", static_cast<wchar_t>(0x12ffff));
   EXPECT_EQ(written, -1);
-  EXPECT_EQ(libc_errno, EILSEQ);
+  EXPECT_EQ(static_cast<int>(libc_errno), EILSEQ);
 }
 #endif // LIBC_COPT_PRINTF_DISABLE_WIDE
