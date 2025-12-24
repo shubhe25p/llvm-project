@@ -16,7 +16,6 @@
 
 #include "src/__support/FPUtil/FPBits.h"
 #include "src/__support/libc_errno.h"
-#include "test/UnitTest/ErrnoCheckingTest.h"
 #include "test/UnitTest/RoundingModeUtils.h"
 #include "test/UnitTest/Test.h"
 #include <inttypes.h>
@@ -3506,23 +3505,48 @@ TEST(LlvmLibcSprintfTest, WideCharConversion) {
 
   // Euro sign left justified.
   written = LIBC_NAMESPACE::sprintf(buff, "%-4lc", static_cast<wchar_t>(L'€'));
-  EXPECT_EQ(written, 6);
-  ASSERT_STREQ(buff, "€   ");
+  EXPECT_EQ(written, 4);
+  ASSERT_STREQ(buff, " €");
 
   // Euro sign right justified.
   written = LIBC_NAMESPACE::sprintf(buff, "%4lc", static_cast<wchar_t>(L'€'));
-  EXPECT_EQ(written, 6);
-  ASSERT_STREQ(buff, "   €");
+  EXPECT_EQ(written, 4);
+  ASSERT_STREQ(buff, "€ ");
+
+  // Grinning face emoji is a 4-byte UTF-8 character.
+  written = LIBC_NAMESPACE::sprintf(buff, "%lc", static_cast<wchar_t>(L'😀'));
+  EXPECT_EQ(written, 4);
+  ASSERT_STREQ(buff, "😀");
+
+  // Grinning face emoji left justified.
+  written = LIBC_NAMESPACE::sprintf(buff, "%-4lc", static_cast<wchar_t>(L'😀'));
+  EXPECT_EQ(written, 4);
+  ASSERT_STREQ(buff, "😀");
+
+  // Grinning face emoji right justified.
+  written = LIBC_NAMESPACE::sprintf(buff, "%4lc", static_cast<wchar_t>(L'😀'));
+  EXPECT_EQ(written, 4);
+  ASSERT_STREQ(buff, "😀");
+
+  // Grinning face emoji with smaller width, left justified.
+  written = LIBC_NAMESPACE::sprintf(buff, "%-3lc", static_cast<wchar_t>(L'😀'));
+  EXPECT_EQ(written, 4);
+  ASSERT_STREQ(buff, "😀");
+
+  // Grinning face emoji with smaller width, right justified.
+  written = LIBC_NAMESPACE::sprintf(buff, "%3lc", static_cast<wchar_t>(L'😀'));
+  EXPECT_EQ(written, 4);
+  ASSERT_STREQ(buff, "😀");
 
   // WEOF test.
   written = LIBC_NAMESPACE::sprintf(buff, "%lc", static_cast<wchar_t>(WEOF));
   EXPECT_EQ(written, -1);
-  ASSERT_ERRNO_FAILURE();
+  ASSERT_EQ(libc_errno, EILSEQ);
 
   // Invalid wide character test
   written =
       LIBC_NAMESPACE::sprintf(buff, "%lc", static_cast<wchar_t>(0x12ffff));
   EXPECT_EQ(written, -1);
-  ASSERT_ERRNO_FAILURE();
+  ASSERT_EQ(libc_errno, EILSEQ);
 }
 #endif // LIBC_COPT_PRINTF_DISABLE_WIDE

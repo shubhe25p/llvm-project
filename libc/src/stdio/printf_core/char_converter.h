@@ -17,6 +17,7 @@
 #include "src/__support/wchar/wcrtomb.h"
 #endif // LIBC_COPT_PRINTF_DISABLE_WIDE
 
+#include "src/__support/CPP/string_view.h"
 #include "src/__support/macros/config.h"
 #include "src/stdio/printf_core/converter_utils.h"
 #include "src/stdio/printf_core/core_structs.h"
@@ -28,40 +29,48 @@ namespace printf_core {
 template <WriteMode write_mode>
 LIBC_INLINE int convert_char(Writer<write_mode> *writer,
                              const FormatSection &to_conv) {
-  char c = static_cast<char>(to_conv.conv_val_raw);
 
-  constexpr int STRING_LEN = 1;
+  char buffer[MB_LEN_MAX];
+  cpp::string_view to_write;
+
+  if (to_conv.length_modifier == LengthModifier::l) {
+#ifndef LIBC_COPT_PRINTF_DISABLE_WIDE
+    wint_t wi = static_cast<wint_t>(to_conv.conv_val_raw);
+
+    if (wi == WEOF) {
+      return ILLEGAL_WIDE_CHAR;
+    }
+
+    mbstate_t mbstate;
+    wchar_t wc = static_cast<wchar_t>(wi);
+    auto ret = wcrtomb(buffer, wc, &mbstate);
+
+    if (ret.has_error()) {
+      return MB_CONVERSION_ERROR;
+    }
+
+    to_write = {buffer, ret.value()};
+#else
+    // If wide characters are disabled, treat the 'l' modifier as a no-op.
+    buffer[0] = static_cast<char>(to_conv.conv_val_raw);
+    to_write = {buffer, 1};
+
+#endif // LIBC_COPT_PRINTF_DISABLE_WIDE
+  } else {
+    buffer[0] = static_cast<char>(to_conv.conv_val_raw);
+    to_write = {buffer, 1};
+  }
 
   size_t padding_spaces =
-      to_conv.min_width > STRING_LEN ? to_conv.min_width - STRING_LEN : 0;
-
+      to_conv.min_width > to_write.size() ? to_conv.min_width - to_write.size() : 0;
+  
   // If the padding is on the left side, write the spaces first.
   if (padding_spaces > 0 &&
       (to_conv.flags & FormatFlags::LEFT_JUSTIFIED) == 0) {
     RET_IF_RESULT_NEGATIVE(writer->write(' ', padding_spaces));
   }
 
-#ifndef LIBC_COPT_PRINTF_DISABLE_WIDE
-  if (to_conv.length_modifier == LengthModifier::l) {
-    wint_t wi = static_cast<wint_t>(to_conv.conv_val_raw);
-
-    if (wi == WEOF) {
-      return -1;
-    }
-
-    char mb_str[MB_LEN_MAX];
-    internal::mbstate mbstate;
-    wchar_t wc = static_cast<wchar_t>(wi);
-
-    auto ret = internal::wcrtomb(mb_str, wc, &mbstate);
-    if (!ret.has_value()) {
-      return -1;
-    }
-
-    RET_IF_RESULT_NEGATIVE(writer->write({mb_str, ret.value()}));
-  } else
-#endif // LIBC_COPT_PRINTF_DISABLE_WIDE
-    RET_IF_RESULT_NEGATIVE(writer->write(c));
+  RET_IF_RESULT_NEGATIVE(writer->write(to_write));
 
   // If the padding is on the right side, write the spaces last.
   if (padding_spaces > 0 &&

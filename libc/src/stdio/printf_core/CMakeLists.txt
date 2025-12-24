@@ -45,7 +45,6 @@ endif()
 
 if(LIBC_CONF_PRINTF_DISABLE_WIDE)
   set(wchar_deps "")
-  list(APPEND printf_config_copts "-DLIBC_COPT_PRINTF_DISABLE_WIDE")
 else()
   set(wchar_deps
     libc.hdr.types.wchar_t
@@ -80,6 +79,7 @@ add_header_library(
     parser.h
   DEPENDS
     .core_structs
+    libc.hdr.types.wint_t
     libc.src.__support.arg_list
     libc.src.__support.ctype_utils
     libc.src.__support.str_to_integer
@@ -89,7 +89,6 @@ add_header_library(
     libc.src.__support.CPP.string_view
     libc.src.__support.CPP.type_traits
     libc.src.__support.common
-    ${wchar_deps}
 )
 
 add_header_library(

@@ -123,6 +123,10 @@ function(_get_compile_options_from_config output_var)
     list(APPEND config_options "-DLIBC_COPT_RAW_MUTEX_DEFAULT_SPIN_COUNT=${LIBC_CONF_RAW_MUTEX_DEFAULT_SPIN_COUNT}")
   endif()
 
+  if (LIBC_CONF_PRINTF_DISABLE_WIDE)
+    list(APPEND config_options "-DLIBC_COPT_PRINTF_DISABLE_WIDE")
+  endif()
+
   set(${output_var} ${config_options} PARENT_SCOPE)
 endfunction(_get_compile_options_from_config)
 
