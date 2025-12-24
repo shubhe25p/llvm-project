@@ -41,11 +41,11 @@ LIBC_INLINE int convert_char(Writer<write_mode> *writer,
       return ILLEGAL_WIDE_CHAR;
     }
 
-    mbstate_t mbstate;
+    internal::mbstate_t mbstate;
     wchar_t wc = static_cast<wchar_t>(wi);
     auto ret = wcrtomb(buffer, wc, &mbstate);
 
-    if (ret.has_error()) {
+    if (!ret.value()) {
       return MB_CONVERSION_ERROR;
     }
 
@@ -61,8 +61,9 @@ LIBC_INLINE int convert_char(Writer<write_mode> *writer,
     to_write = {buffer, 1};
   }
 
+  int wlen = static_cast<int>(to_write.size());
   size_t padding_spaces =
-      to_conv.min_width > to_write.size() ? to_conv.min_width - to_write.size() : 0;
+      to_conv.min_width > wlen ? to_conv.min_width - wlen : 0;
   
   // If the padding is on the left side, write the spaces first.
   if (padding_spaces > 0 &&
