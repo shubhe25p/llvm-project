@@ -41,7 +41,7 @@ LIBC_INLINE int convert_char(Writer<write_mode> *writer,
       return ILLEGAL_WIDE_CHAR;
     }
 
-    internal::mbstate_t mbstate;
+    internal::mbstate mbstate;
     wchar_t wc = static_cast<wchar_t>(wi);
     auto ret = wcrtomb(buffer, wc, &mbstate);
 
