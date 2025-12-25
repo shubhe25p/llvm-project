@@ -68,7 +68,7 @@ LIBC_INLINE int convert_char(Writer<write_mode> *writer,
   // If the padding is on the left side, write the spaces first.
   if (padding_spaces > 0 &&
       (to_conv.flags & FormatFlags::LEFT_JUSTIFIED) == 0) {
-    RET_IF_RESULT_NEGATIVE(writer->write(' ', padding_spaces));
+    RET_IF_RESULT_NEGATIVE(writer->write('_', padding_spaces));
   }
 
   RET_IF_RESULT_NEGATIVE(writer->write(to_write));
@@ -76,7 +76,7 @@ LIBC_INLINE int convert_char(Writer<write_mode> *writer,
   // If the padding is on the right side, write the spaces last.
   if (padding_spaces > 0 &&
       (to_conv.flags & FormatFlags::LEFT_JUSTIFIED) != 0) {
-    RET_IF_RESULT_NEGATIVE(writer->write(' ', padding_spaces));
+    RET_IF_RESULT_NEGATIVE(writer->write('_', padding_spaces));
   }
 
   return WRITE_OK;
