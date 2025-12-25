@@ -3503,15 +3503,15 @@ TEST(LlvmLibcSprintfTest, WideCharConversion) {
   EXPECT_EQ(written, 3);
   ASSERT_STREQ_LEN(written, buff, "€");
 
-  // Euro sign left justified.
+  // Euro sign right justified.
   written = LIBC_NAMESPACE::sprintf(buff, "%-4lc", static_cast<wchar_t>(L'€'));
   EXPECT_EQ(written, 4);
-  ASSERT_STREQ_LEN(written, buff, " €");
+  ASSERT_STREQ_LEN(written, buff, "€ ");
 
-  // Euro sign right justified.
+  // Euro sign left justified.
   written = LIBC_NAMESPACE::sprintf(buff, "%4lc", static_cast<wchar_t>(L'€'));
   EXPECT_EQ(written, 4);
-  ASSERT_STREQ_LEN(written, buff, "€ ");
+  ASSERT_STREQ_LEN(written, buff, " €");
 
   // Grinning face emoji is a 4-byte UTF-8 character.
   written = LIBC_NAMESPACE::sprintf(buff, "%lc", static_cast<wchar_t>(L'😀'));

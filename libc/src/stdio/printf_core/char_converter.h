@@ -79,10 +79,6 @@ LIBC_INLINE int convert_char(Writer<write_mode> *writer,
     RET_IF_RESULT_NEGATIVE(writer->write(' ', padding_spaces));
   }
 
-  if (to_conv.length_modifier == LengthModifier::l) {
-    RET_IF_RESULT_NEGATIVE(writer->write('_', padding_spaces));
-  }
-
   return WRITE_OK;
 }
 
