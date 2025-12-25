@@ -45,7 +45,7 @@ LIBC_INLINE int convert_char(Writer<write_mode> *writer,
     wchar_t wc = static_cast<wchar_t>(wi);
     auto ret = wcrtomb(buffer, wc, &mbstate);
 
-    if (!ret.value()) {
+    if (!ret.has_value()) {
       return MB_CONVERSION_ERROR;
     }
 
