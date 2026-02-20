@@ -74,7 +74,7 @@ LIBC_INLINE int wchar_writer(Writer<write_mode> *writer, const FormatSection &to
 
 #ifndef LIBC_COPT_PRINTF_NO_NULLPTR_CHECKS
   if (wstr_ptr == nullptr) {
-    wstr_ptr = "(null)";
+    wstr_ptr = U"(null)";
   }
 #endif // LIBC_COPT_PRINTF_NO_NULLPTR_CHECKS
 
