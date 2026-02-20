@@ -10,7 +10,8 @@
 #define LLVM_LIBC_SRC_STDIO_PRINTF_CORE_STRING_CONVERTER_H
 
 #ifndef LIBC_COPT_PRINTF_DISABLE_WIDE
-#include "hdr/types/wchar_t.h"
+#include "hdr/types/char32_t.h"
+#include "hdr/types/char8_t.h"
 #include "src/__support/wchar/mbstate.h"
 #include "src/__support/wchar/string_converter.h"
 #endif // LIBC_COPT_PRINTF_DISABLE_WIDE
@@ -68,7 +69,7 @@ LIBC_INLINE int char_writer(Writer<write_mode> *writer, const FormatSection &to_
 template <WriteMode write_mode>
 LIBC_INLINE int wchar_writer(Writer<write_mode> *writer, const FormatSection &to_conv) {
   size_t string_len = 0;
-  const wchar_t *wstr_ptr = reinterpret_cast<const wchar_t *>(to_conv.conv_val_ptr);
+  const char32_t *wstr_ptr = reinterpret_cast<const char32_t *>(to_conv.conv_val_ptr);
   size_t precision = to_conv.precision < 0 ? SIZE_MAX : static_cast<size_t>(to_conv.precision);
 
 #ifndef LIBC_COPT_PRINTF_NO_NULLPTR_CHECKS
@@ -77,7 +78,7 @@ LIBC_INLINE int wchar_writer(Writer<write_mode> *writer, const FormatSection &to
   }
 #endif // LIBC_COPT_PRINTF_NO_NULLPTR_CHECKS
 
-  internal::mbstate_t mbstate;
+  internal::mbstate mbstate;
 
   internal::StringConverter<char32_t> str_conv(wstr_ptr, &mbstate, precision);
 
