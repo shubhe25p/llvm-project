@@ -53,6 +53,7 @@ else()
     libc.hdr.wchar_macros
     libc.src.__support.wchar.wcrtomb
     libc.src.__support.wchar.mbstate
+    libc.src.__support.wchar.string_converter
   )
   set(parser_wchar_deps
     libc.hdr.types.wint_t
@@ -129,8 +130,10 @@ add_header_library(
     .writer
     libc.include.inttypes
     libc.hdr.limits_macros
+    libc.src.string.string_utils
     libc.src.__support.big_int
     libc.src.__support.common
+    libc.src.__support.CPP.algorithm
     libc.src.__support.CPP.limits
     libc.src.__support.CPP.span
     libc.src.__support.CPP.string_view
