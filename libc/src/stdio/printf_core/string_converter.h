@@ -16,7 +16,7 @@
 #include "src/__support/wchar/string_converter.h"
 #endif // LIBC_COPT_PRINTF_DISABLE_WIDE
 
-#include "src/__support/CPP/string_view.h"
+#include "src/string/string_utils.h" // string_length
 #include "src/__support/macros/config.h"
 #include "src/stdio/printf_core/converter_utils.h"
 #include "src/stdio/printf_core/core_structs.h"
@@ -29,8 +29,8 @@ namespace printf_core {
 
 template <WriteMode write_mode>
 LIBC_INLINE int char_writer(Writer<write_mode> *writer, const FormatSection &to_conv) {
-  size_t string_len = 0;
   const char *str_ptr = reinterpret_cast<const char *>(to_conv.conv_val_ptr);
+  size_t string_len = 0;
 
 #ifndef LIBC_COPT_PRINTF_NO_NULLPTR_CHECKS
   if (str_ptr == nullptr) {
@@ -38,9 +38,7 @@ LIBC_INLINE int char_writer(Writer<write_mode> *writer, const FormatSection &to_
   }
 #endif // LIBC_COPT_PRINTF_NO_NULLPTR_CHECKS
 
-  for (const char *cur_str = (str_ptr); cur_str[string_len]; ++string_len) {
-    ;
-  }
+  string_len = internal::string_length(str_ptr);
 
   if (to_conv.precision >= 0 &&
       static_cast<size_t>(to_conv.precision) < string_len)
@@ -80,9 +78,9 @@ LIBC_INLINE int wchar_writer(Writer<write_mode> *writer, const FormatSection &to
 
   internal::mbstate mbstate;
 
-  internal::StringConverter<char32_t> str_conv(wstr_ptr, &mbstate, precision);
+  internal::StringConverter<char32_t> length_counter(wstr_ptr, &mbstate, precision);
 
-  for (auto converted = str_conv.pop<char8_t>(); converted.has_value() && converted.value() != '\0'; converted = str_conv.pop<char8_t>()) {
+  for (auto converted = length_counter.pop<char8_t>(); converted.has_value() && converted.value() != '\0'; converted = length_counter.pop<char8_t>()) {
     ++string_len;
   }
 
@@ -96,9 +94,10 @@ LIBC_INLINE int wchar_writer(Writer<write_mode> *writer, const FormatSection &to
     RET_IF_RESULT_NEGATIVE(writer->write(' ', padding_spaces));
   }
 
-  internal::StringConverter<char32_t> str_conv1(wstr_ptr, &mbstate, precision);
+  mbstate = internal::mbstate();
+  internal::StringConverter<char32_t> out_conv(wstr_ptr, &mbstate, precision);
 
-  for (auto converted = str_conv1.pop<char8_t>(); converted.has_value() && converted.value() != '\0'; converted = str_conv1.pop<char8_t>()) {
+  for (auto converted = out_conv.pop<char8_t>(); converted.has_value() && converted.value() != '\0'; converted = out_conv.pop<char8_t>()) {
     RET_IF_RESULT_NEGATIVE(writer->write(static_cast<char>(converted.value())));
   }
 
