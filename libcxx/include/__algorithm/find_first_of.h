@@ -26,10 +26,12 @@ _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 _ForwardIterator1 __find_fir
     _ForwardIterator2 __first2,
     _ForwardIterator2 __last2,
     _BinaryPredicate&& __pred) {
-  for (; __first1 != __last1; ++__first1)
-    for (_ForwardIterator2 __j = __first2; __j != __last2; ++__j)
-      if (__pred(*__first1, *__j))
+  for (; __first1 != __last1; ++__first1) {
+    if (std::find_if(__first2, __last2, [&](auto& __elem){
+      return __pred(*__first1, __elem);
+    }) != __last2)
         return __first1;
+  }
   return __last1;
 }
 
